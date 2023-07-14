@@ -35,4 +35,4 @@ jobs:
         file: ./Dockerfile
         push: true
         tags: |
-          $OWNER/php:latest
+          dnbz/php:latest
