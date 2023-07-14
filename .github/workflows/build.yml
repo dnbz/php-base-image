@@ -2,8 +2,8 @@ name: build
 
 on:
   push:
-    branches:
-    tags:
+    branches: [ '*' ]
+    tags: [ '*' ]
 
 jobs:
   build_image:
