@@ -29,12 +29,10 @@ jobs:
     - name: Build and Push Docker Image
       env:
         OWNER: $GITHUB_USER
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v4
       with:
         context: .
         file: ./Dockerfile
-        target: final
-        TAG: latest
         push: true
         tags: |
-          ghcr.io/dnbz/php:latest
+          $OWNER/php:latest
