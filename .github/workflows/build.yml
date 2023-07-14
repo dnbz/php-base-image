@@ -36,6 +36,7 @@ jobs:
         context: .
         file: ./Dockerfile
         target: final
+        TAG: latest
         push: true
         tags: |
-          $REGISTRY/$OWNER/$IMAGE_NAME:latest
+          $REGISTRY/$OWNER/$IMAGE_NAME:$TAG
