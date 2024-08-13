@@ -1,31 +1,12 @@
-FROM docker.io/webdevops/php:8.3
+FROM docker.io/openswoole/swoole:php8.3-alpine
 
 WORKDIR /app
 
 # install ffmpeg for video encoding
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends ffmpeg \
-    # dependencies for swoole
-    libcurl4-openssl-dev       \
-    libbrotli-dev              \
-    libpq-dev                  \
-    libssl-dev                 \
-    supervisor                 \
-    unzip                      \
-    zlib1g-dev
+RUN apk add --no-cache ffmpeg
 
 # install cronn the cron replacement
-RUN wget "https://github.com/umputun/cronn/releases/download/v1.0.0/cronn_v1.0.0_linux_amd64.deb" && \
-    apt install ./cronn_v1.0.0_linux_amd64.deb || true && \
-    rm -f cronn_v1.0.0_linux_amd64.deb
-
-# clean the apt cache only after installing all packages
-RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# install swoole
-RUN pecl install swoole
-
-
-ARG UID=1000
-COPY --chown=$UID . .
+RUN wget "https://github.com/umputun/cronn/releases/download/v1.1.0/cronn_v1.1.0_linux_x86_64.tar.gz" && \
+    tar -xzf cronn_v1.1.0_linux_x86_64.tar.gz && \
+    mv cronn /usr/local/bin/cronn && \
+    rm cronn_v1.1.0_linux_x86_64.tar.gz
