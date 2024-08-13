@@ -4,7 +4,15 @@ WORKDIR /app
 
 # install ffmpeg for video encoding
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ffmpeg
+    apt-get install -y --no-install-recommends ffmpeg \
+    # dependencies for swoole
+    libcurl4-openssl-dev       \
+    libbrotli-dev              \
+    libpq-dev                  \
+    libssl-dev                 \
+    supervisor                 \
+    unzip                      \
+    zlib1g-dev
 
 # install cronn the cron replacement
 RUN wget "https://github.com/umputun/cronn/releases/download/v1.0.0/cronn_v1.0.0_linux_amd64.deb" && \
@@ -14,6 +22,9 @@ RUN wget "https://github.com/umputun/cronn/releases/download/v1.0.0/cronn_v1.0.0
 # clean the apt cache only after installing all packages
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# install swoole
+RUN pecl install swoole
 
 
 ARG UID=1000
