@@ -1,52 +1,33 @@
-FROM docker.io/openswoole/swoole:php8.3-alpine
-
-# variable for holding dev dependencies
-ARG DEV_DEPENDENCIES="curl-dev pcre-dev libpng-dev libjpeg-turbo-dev freetype-dev libxslt-dev gettext-dev icu-dev libzip-dev zip libxml2-dev postgresql-dev sqlite-dev libmcrypt-dev libmemcached-dev libssh-dev gettext autoconf cmake make gcc g++ tzdata musl-dev libc-dev"
+FROM docker.io/phpswoole/swoole:php8.3-alpine
 
 WORKDIR /app
 
 RUN apk add --no-cache \
+    php83-pecl-imagick \
+    php83-intl \
+    php83-pcntl \
     # ffmpeg for video encoding
     ffmpeg \
     # extra utils
     vim \
     curl \
     bash \
-    # dependencies for php extensions
-    $DEV_DEPENDENCIES
+    # php extension dependencies \
+    libzip-dev
 
 # install PHP extensions
 RUN docker-php-ext-install \
-    pdo_mysql \
-    mysqli \
-    bcmath \
-    pcntl \
-    sockets \
-    opcache \
-    exif \
-    curl \
-    gd \
-    intl \
-    zip \
-    xsl \
-    gettext \
-    shmop \
-    sysvmsg \
-    sysvsem \
-    sysvshm \
-    pdo_pgsql \
-    pgsql \
-    pdo_sqlite
+    zip && \
+    docker-php-ext-enable zip
 
+# create symlinks for extensions installed from alpine repos
+RUN ln -s /usr/lib/php83/modules/imagick.so /usr/local/lib/php/extensions/no-debug-non-zts-20230831/ && \
+    ln -s /usr/lib/php83/modules/intl.so /usr/local/lib/php/extensions/no-debug-non-zts-20230831/ && \
+    ln -s /usr/lib/php83/modules/pcntl.so /usr/local/lib/php/extensions/no-debug-non-zts-20230831/ && \
+    echo "extension=imagick.so" > /usr/local/etc/php/conf.d/imagick.ini && \
+    echo "extension=intl.so" > /usr/local/etc/php/conf.d/intl.ini && \
+    echo "extension=pcntl.so" > /usr/local/etc/php/conf.d/pcntl.ini
 
-# install extensions from pecl
-RUN pecl install -o -f redis mcrypt \
-&& docker-php-ext-enable redis mcrypt
-
-# remove build dependencies
-RUN apk del $DEV_DEPENDENCIES
-
-# install cronn the cron replacement
 RUN wget "https://github.com/umputun/cronn/releases/download/v1.1.0/cronn_v1.1.0_linux_x86_64.tar.gz" && \
     tar -xzf cronn_v1.1.0_linux_x86_64.tar.gz && \
     mv cronn /usr/local/bin/cronn && \
