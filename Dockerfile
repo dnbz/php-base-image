@@ -1,4 +1,5 @@
-FROM docker.io/phpswoole/swoole:php8.3-alpine
+# Base image
+FROM docker.io/phpswoole/swoole:php8.3-alpine AS base
 
 WORKDIR /app
 
@@ -35,3 +36,12 @@ RUN wget "https://github.com/umputun/cronn/releases/download/v1.1.0/cronn_v1.1.0
     tar -xzf cronn_v1.1.0_linux_x86_64.tar.gz && \
     mv cronn /usr/local/bin/cronn && \
     rm cronn_v1.1.0_linux_x86_64.tar.gz
+
+# Development image
+FROM base AS dev
+
+# Install Xdebug
+RUN apk add --no-cache $PHPIZE_DEPS && \
+    pecl install xdebug && \
+    docker-php-ext-enable xdebug && \
+    apk del $PHPIZE_DEPS

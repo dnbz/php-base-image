@@ -13,39 +13,82 @@ jobs:
       packages: write
       contents: read
     steps:
-    - name: Checkout the repository
-      uses: actions/checkout@v2
+      - name: Checkout the repository
+        uses: actions/checkout@v2
 
-    - name: Login to GitHub Container registry
-      uses: docker/login-action@v1
-      env:
-        GITHUB_USER: ${{ github.actor }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        registry: ghcr.io
-        username: $GITHUB_USER
-        password: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: Generate tags for the image
-      id: meta
-      uses: docker/metadata-action@v4
-      with:
-        # list of Docker images to use as base name for tags
-        images: |
+      - name: Login to GitHub Container registry
+        uses: docker/login-action@v1
+        env:
+          GITHUB_USER: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          registry: ghcr.io
+          username: $GITHUB_USER
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate tags for the image
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
             ghcr.io/${{ github.repository_owner }}/php
-        # generate Docker tags based on the following events/attributes
-        tags: |
+          # generate Docker tags based on the following events/attributes
+          tags: |
             type=ref,event=tag
             type=raw,value=latest
 
-    - name: Build and Push Docker Image
-      if: ${{ startsWith(github.ref, 'refs/tags/') }}
-      env:
-        OWNER: $GITHUB_USER
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        file: ./Dockerfile
-        push: true
-        tags: |
-          ${{ steps.meta.outputs.tags }}
+      - name: Build and Push Docker Image
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        env:
+          OWNER: $GITHUB_USER
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.tags }}
+
+  build-push-dev:
+    name: Build and push dev Docker image to GitHub Container registry
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
+      - name: Login to GitHub Container registry
+        uses: docker/login-action@v1
+        env:
+          GITHUB_USER: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          registry: ghcr.io
+          username: $GITHUB_USER
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate tags for the dev image
+        id: meta-dev
+        uses: docker/metadata-action@v4
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            ghcr.io/${{ github.repository_owner }}/php-dev
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=raw,value=php-dev
+
+      - name: Build and Push Dev Docker Image
+        env:
+          OWNER: $GITHUB_USER
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          target: dev
+          push: true
+          tags: |
+            ${{ steps.meta-dev.outputs.tags }}
