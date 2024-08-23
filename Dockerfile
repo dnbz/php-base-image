@@ -41,7 +41,7 @@ RUN wget "https://github.com/umputun/cronn/releases/download/v1.1.0/cronn_v1.1.0
 FROM base AS dev
 
 # Install Xdebug
-RUN apk add --no-cache $PHPIZE_DEPS && \
+RUN apk add --no-cache $PHPIZE_DEPS linux-headers && \
     pecl install xdebug && \
     docker-php-ext-enable xdebug && \
-    apk del $PHPIZE_DEPS
+    apk del $PHPIZE_DEPS linux-headers
